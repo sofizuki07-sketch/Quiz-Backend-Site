@@ -305,17 +305,19 @@
             messageEl.textContent = '';
 
             try {
-                // Меняем формат отправки данных на text/plain, чтобы избежать проблем с CORS
+                // Создаем данные в формате обычной формы
+                const formData = new URLSearchParams();
+                formData.append('userName', userNameInput);
+                formData.append('answers', JSON.stringify(answers));
+
+                // Отправляем
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
-                        'Content-Type': 'text/plain', // <--- ВАЖНОЕ ИЗМЕНЕНИЕ
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    body: JSON.stringify({
-                        userName: userNameInput,
-                        answers: answers
-                    })
+                    body: formData.toString()
                 });
 
                 messageEl.textContent = '✅ Результаты успешно отправлены!';
