@@ -305,11 +305,12 @@
             messageEl.textContent = '';
 
             try {
+                // Меняем формат отправки данных на text/plain, чтобы избежать проблем с CORS
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'text/plain', // <--- ВАЖНОЕ ИЗМЕНЕНИЕ
                     },
                     body: JSON.stringify({
                         userName: userNameInput,
@@ -321,7 +322,6 @@
                 messageEl.className = 'message success';
                 form.reset();
                 
-                // Возвращаем кнопку в исходное состояние через 3 секунды
                 setTimeout(() => {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Отправить результаты';
