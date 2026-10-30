@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест по материалам урока</title>
+    <style>
+        /* Базовые стили */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .quiz-container {
+            background: white;
+            max-width: 700px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a2e;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        .user-info {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .user-info input {
+            width: 80%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .user-info input:focus {
+            border-color: #4361ee;
+        }
+        .question {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .question:last-of-type {
+            border-bottom: none;
+        }
+        .question p {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #222;
+        }
+        .options label {
+            display: block;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .options label:hover {
+            background: #e9ecef;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #4361ee;
+        }
+        .options input[type="radio"]:checked + span {
+            color: #4361ee;
+            font-weight: 600;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            background: #3a56d4;
+        }
+        .btn-submit:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        .message {
+            text-align: center;
+            margin-top: 16px;
+            font-weight: 500;
+        }
+        .message.success {
+            color: #2e7d32;
+        }
+        .message.error {
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>📋 Тест по уроку</h1>
+        <p class="subtitle">Ответьте на все 10 вопросов и нажмите «Отправить»</p>
+
+        <form id="quizForm">
+            <!-- Поле для ввода имени -->
+            <div class="user-info">
+                <input type="text" id="userName" placeholder="Введите ваше имя и фамилию" required>
+            </div>
+
+            <!-- Вопросы будут сгенерированы из JavaScript -->
+            <div id="questionsContainer"></div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Отправить результаты</button>
+            <div id="message" class="message"></div>
+        </form>
+    </div>
+
+    <script>
+        // === НАСТРОЙКИ ===
+        // Ваш URL веб-приложения Google Apps Script
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzv6ZJvBtO14GvWKZjZOFtIOis1DMLBuNACtrTDVBpQ2beuv44-O177ljDkS9TmzEIM5Q/exec';
+
+        // === ВОПРОСЫ ТЕСТА ===
+        const quizData = [
+            {
+                text: "Что такое статический сайт?",
+                options: [
+                    "Сайт, который генерирует HTML-страницы на лету с помощью серверных скриптов",
+                    "Сайт, HTML-код которого фиксирован и не изменяется при каждом запросе",
+                    "Сайт, который обязательно использует базу данных",
+                    "Сайт, который не может содержать интерактивные элементы"
+                ],
+                correct: 1
+            },
+            {
+                text: "Какие технологии чаще всего используются для создания статических сайтов?",
+                options: [
+                    "HTML, CSS, JavaScript",
+                    "PHP, MySQL",
+                    "Python, Django",
+                    "Java, Spring"
+                ],
+                correct: 0
+            },
+            {
+                text: "Что позволяет отправлять данные из HTML-формы в Google Sheets без собственного сервера?",
+                options: [
+                    "Google Sheets API v4 с ключом API",
+                    "Google Apps Script, развернутый как веб-приложение",
+                    "Прямой SQL-запрос к таблице",
+                    "FTP-загрузка файла"
+                ],
+                correct: 1
+            },
+            {
+                text: "Какое действие необходимо выполнить с Google Apps Script, чтобы к нему могли обращаться анонимные пользователи с сайта?",
+                options: [
+                    "Опубликовать скрипт как библиотеку",
+                    "Развернуть как веб-приложение с доступом «Все, даже анонимные»",
+                    "Добавить скрипт в исключения брандмауэра",
+                    "Использовать только в режиме редактора"
+                ],
+                correct: 1
+            },
+            {
+                text: "Какой метод HTTP обычно используется для отправки данных формы на сервер (или в Apps Script)?",
+                options: [
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "DELETE"
+                ],
+                correct: 1
+            },
+            {
+                text: "Что такое CORS и почему это важно при отправке запросов из статического сайта?",
+                options: [
+                    "Это система контроля версий для кода",
+                    "Это механизм безопасности браузера, который может блокировать запросы к другому домену",
+                    "Это способ сжатия данных перед отправкой",
+                    "Это протокол для передачи файлов"
+                ],
+                correct: 1
+            },
+            {
+                text: "Какая функция JavaScript используется для отправки асинхронного запроса на сервер?",
+                options: [
+                    "console.log()",
+                    "fetch()",
+                    "alert()",
+                    "parseInt()"
+                ],
+                correct: 1
+            },
+            {
+                text: "Где в Google Apps Script можно найти URL развернутого веб-приложения?",
+                options: [
+                    "В настройках таблицы",
+                    "В диалоговом окне «Развернуть» → «Управление развертываниями»",
+                    "В адресной строке браузера при открытии скрипта",
+                    "В меню «Файл» → «Свойства»"
+                ],
+                correct: 1
+            },
+            {
+                text: "Какой объект в Google Apps Script используется для получения данных, отправленных методом POST?",
+                options: [
+                    "e.parameter",
+                    "e.postData.contents",
+                    "e.queryString",
+                    "e.pathInfo"
+                ],
+                correct: 1
+            },
+            {
+                text: "Что произойдет, если в настройках развертывания Apps Script указать доступ «Только я»?",
+                options: [
+                    "Сайт сможет отправлять данные, но они не сохранятся",
+                    "Запросы с сайта будут блокироваться, так как у него нет прав доступа",
+                    "Данные будут сохраняться в черновик",
+                    "Сайт будет работать быстрее"
+                ],
+                correct: 1
+            }
+        ];
+
+        // === ЛОГИКА ТЕСТА ===
+        const container = document.getElementById('questionsContainer');
+        const form = document.getElementById('quizForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageEl = document.getElementById('message');
+
+        // 1. Генерация вопросов на странице
+        quizData.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.innerHTML = `<p>${index + 1}. ${q.text}</p>`;
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+
+            q.options.forEach((opt, optIndex) => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = `q${index}`;
+                input.value = optIndex;
+                input.required = true;
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(opt));
+                optionsDiv.appendChild(label);
+            });
+
+            questionDiv.appendChild(optionsDiv);
+            container.appendChild(questionDiv);
+        });
+
+        // 2. Обработка отправки формы
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const userNameInput = document.getElementById('userName').value.trim();
+            if (!userNameInput) {
+                messageEl.textContent = 'Пожалуйста, введите ваше имя.';
+                messageEl.className = 'message error';
+                return;
+            }
+
+            const answers = [];
+            for (let i = 0; i < quizData.length; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!selected) {
+                    messageEl.textContent = `Пожалуйста, ответьте на вопрос №${i + 1}.`;
+                    messageEl.className = 'message error';
+                    return;
+                }
+                answers.push(parseInt(selected.value));
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
+            messageEl.textContent = '';
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userName: userNameInput,
+                        answers: answers
+                    })
+                });
+
+                messageEl.textContent = '✅ Результаты успешно отправлены!';
+                messageEl.className = 'message success';
+                form.reset();
+                
+                // Возвращаем кнопку в исходное состояние через 3 секунды
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Отправить результаты';
+                }, 3000);
+
+            } catch (error) {
+                console.error('Ошибка отправки:', error);
+                messageEl.textContent = '❌ Ошибка отправки. Проверьте соединение.';
+                messageEl.className = 'message error';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Отправить результаты';
+            }
+        });
+    </script>
+</body>
+</html>
